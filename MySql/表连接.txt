@@ -1,0 +1,190 @@
+跨表查询
+	年代分类：
+		SQL92
+			select ename,dname from emp as e,dept as d where e.deptno = d.deptno;
+		SQL99(掌握)
+			select 
+				e.ename,d.dname
+			from
+				emp e
+			join
+				dept d
+			on
+				e.deptno = d.deptno
+			where 
+				数据过滤条件;
+	连接方式分类：
+		内连接：省略了一个关键字：inner
+			等值连接
+				查询出员工所对应的部门名称
+				select 
+					e.ename,d.dname
+				from
+					emp e
+				inner join
+					dept d
+				on
+					e.deptno = d.deptno
+			非等值连接
+				查询出员工薪水所对应的薪水等级:显示员工名称，薪水，薪水等级
+				select * from salgrade;
+				s
+				+-------+-------+-------+
+				| GRADE | LOSAL | HISAL |
+				+-------+-------+-------+
+				|     1 |   700 |  1200 |
+				|     2 |  1201 |  1400 |
+				|     3 |  1401 |  2000 |
+				|     4 |  2001 |  3000 |
+				|     5 |  3001 |  9999 |
+				+-------+-------+-------+
+				select ename,sal from emp;
+				e
+				+--------+---------+
+				| ename  | sal     |
+				+--------+---------+
+				| SMITH  |  800.00 |
+				| ALLEN  | 1600.00 |
+				| WARD   | 1250.00 |
+				| JONES  | 2975.00 |
+				| MARTIN | 1250.00 |
+				| BLAKE  | 2850.00 |
+				| CLARK  | 2450.00 |
+				| SCOTT  | 3000.00 |
+				| KING   | 5000.00 |
+				| TURNER | 1500.00 |
+				| ADAMS  | 1100.00 |
+				| JAMES  |  950.00 |
+				| FORD   | 3000.00 |
+				| MILLER | 1300.00 |
+				+--------+---------+
+				以上两张表的连接条件是：e.sal between s.losal and s.hisal
+				select 
+					e.ename,e.sal,s.grade
+				from
+					emp e
+				inner join
+					salgrade s
+				on
+					e.sal between s.losal and s.hisal;
+			自连接:把一张表看成两张表使用
+				查询出员工所对应的领导名称：显示员工名称和领导名称
+				以下查询结果是：员工所对应的领导编号
+				a(ename,mgr)
+				+--------+------+
+				| ename  | mgr  |
+				+--------+------+
+				| SMITH  | 7902 | FORD
+				| ALLEN  | 7698 | BLAKE
+				| WARD   | 7698 | BLAKE
+				| JONES  | 7839 | KING
+				| MARTIN | 7698 |
+				| BLAKE  | 7839 |
+				| CLARK  | 7839 |
+				| SCOTT  | 7566 |
+				| KING   | NULL |
+				| TURNER | 7698 |
+				| ADAMS  | 7788 |
+				| JAMES  | 7698 |
+				| FORD   | 7566 |
+				| MILLER | 7782 |
+				+--------+------+
+
+				查询出领导名称及领导编号
+				select empno,ename from emp;
+				b(empno,ename)
+				+-------+--------+
+				| empno | ename  |
+				+-------+--------+
+				|  7369 | SMITH  |
+				|  7499 | ALLEN  |
+				|  7521 | WARD   |
+				|  7566 | JONES  |
+				|  7654 | MARTIN |
+				|  7698 | BLAKE  |
+				|  7782 | CLARK  |
+				|  7788 | SCOTT  |
+				|  7839 | KING   |
+				|  7844 | TURNER |
+				|  7876 | ADAMS  |
+				|  7900 | JAMES  |
+				|  7902 | FORD   |
+				|  7934 | MILLER |
+				+-------+--------+
+
+				表的连接条件：a.mgr = b.empno
+				select 
+					a.ename,b.ename as leadername
+				from
+					emp a
+				join
+					emp b
+				on
+					a.mgr = b.empno;
+
+
+		外连接：省略了一个关键字：outer
+			右外连接/右连接
+			select 
+				e.ename,d.dname
+			from
+				emp e
+			right outer join
+				dept d
+			on
+				e.deptno = d.deptno;
+			左外连接/左连接
+				select 
+					a.ename,b.ename as leadername
+				from
+					emp a
+				left outer join
+					emp b
+				on
+					a.mgr = b.empno;
+
+				select 
+					a.ename,b.ename as leadername
+				from
+					emp b
+				right outer join
+					emp a
+				on
+					a.mgr = b.empno;
+		全连接
+		
+		外连接最重要的特点是：主表的数据不会掉失，
+		
+
+查询出员工的部门名称，员工的领导名称和薪水等级
+emp dept salgrade
+select 
+	d.dname,
+	e.ename,
+	b.ename as leadername,
+	s.grade
+from
+	emp e
+join
+	dept d
+on
+	e.deptno = d.deptno
+join
+	emp b
+on
+	e.mgr = b.empno
+join
+	salgrade s
+on
+	e.sal between s.losal and s.hisal;
+			
+找出薪水比公司平均薪水高的员工，要求显示员工名和薪水
+select avg(sal) as avgsal from emp;
++-------------+
+| avgsal      |
++-------------+
+| 2073.214286 |
++-------------+
+
+select ename,sal from emp where sal > (select avg(sal) as avgsal from emp);
+

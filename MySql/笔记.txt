@@ -1,0 +1,281 @@
+	4. union (可以将查询结果相加)
+	案例：找出工作岗位为SALESMAN和MANAGER的员工
+	第一种：select eanme,job form emp where job = 'SALESMAN' or job ='MANAGER';
+	第二种：select ename ,job from emp where job in ('SALESMAN','MANAGER');
+	第三种：select eanme ,job from emp where job = 'SALESMAN' 
+			union 
+			select ename ,job from where job = 'MANAGER';
+			
+	两张不同的表的数据拼接在一起？
+
+
+   5. **limit (重点)**分页查询 mysql特有的，其他数据库不能用 （oracle 中有一个相同的机制叫rownum）
+   规则 ： 
+   limit startIndex lenght
+	startIndex:起始位
+	lenght:取几个
+	
+	案例：取工资最高前五位
+	 select ename ,sal from emp order by desc limit 0, 5;
+	 select ename ,sal from emp order by desc limit 5;//省略，则从0开始
+	 
+	 limit是sql语句最后执行的一个环节：
+	 select  5
+	 ....
+	 form   1
+	 ...
+	 where   2
+	 ..
+	 group by  3
+	 ...
+	 having    4
+	 ...
+	 order by   6
+	 ...
+	 limit      7
+	 ..;
+	 
+	 
+
+	6 ，创建表：
+	创建表语句格式：
+	create table  表名(
+	字段名  数据类型，
+	...
+	
+	);
+
+	关于mysql当中字段的数据类型？
+	int  整数型
+	bigint 长整型
+	float  浮点型
+	char   定长字符串
+	varchar 可变长字符串  效率没有char快
+	date    日期类型
+	BLOB    二进制大对象  (存储图片，视频等)
+	CLOB    字符大对象  (存储大数据的文本)
+
+	char和varchar 怎么选择
+	当某个字段数据长度不发生改变时候，是定长，例如：性别，生日采用char
+	当不肯定时，用varchar
+
+
+	表名在数据库当中建议用：t_或者tbl_开始
+
+	create table t_person(name varchar(255),age int , sex char(1));
+	+-------+--------------+------+-----+---------+-------+
+	| Field | Type         | Null | Key | Default | Extra |
+	+-------+--------------+------+-----+---------+-------+
+	| name  | varchar(255) | YES  |     | NULL    |       |
+	| age   | int          | YES  |     | NULL    |       |
+	| sex   | char(1)      | YES  |     | NULL    |       |
+	+-------+--------------+------+-----+---------+-------+
+
+
+  7.insert 语句插入数据
+  语法格式：
+  insert into 表名 (字段1，字段2...) values(值1，值2...)
+  要求字段的数量与值的数量相同，并且数据类型要对应相同。
+
+	例如:有一张表，字段有name,age,sex
+	
+	insert into t_person(name) values('lihai');//只插入name的值 ，其他的数据都为null
+	mysql> select * from t_person;
+	+-------+------+------+
+	| name  | age  | sex  |
+	+-------+------+------+
+	| lihai | NULL | NULL |
+	+-------+------+------+
+	
+	如果没有设置值，自动插入null
+	mysql> desc t_person ;
+	+-------+--------------+------+-----+---------+-------+
+	| Field | Type         | Null | Key | Default | Extra |
+	+-------+--------------+------+-----+---------+-------+
+	| name  | varchar(255) | YES  |     | NULL    |       |
+	| age   | int          | YES  |     | NULL    |       |
+	| sex   | char(1)      | YES  |     | NULL    |       |
+	+-------+--------------+------+-----+---------+-------+
+	
+	如果不想默认值为null,可以在创建表时，设置默认值
+	mysql> create table t_person (name varchar(255) , age int default 0 , sex char(1));
+	Query OK, 0 rows affected (0.04 sec)
+
+	mysql> desc t_person;
+	+-------+--------------+------+-----+---------+-------+
+	| Field | Type         | Null | Key | Default | Extra |
+	+-------+--------------+------+-----+---------+-------+
+	| name  | varchar(255) | YES  |     | NULL    |       |
+	| age   | int          | YES  |     | 0       |       |
+	| sex   | char(1)      | YES  |     | NULL    |       |
+	+-------+--------------+------+-----+---------+-------+
+		
+	
+	mysql> insert into t_person (name) values('李海');//只设置某个字段 ，其他字段会自动插入默认值
+	Query OK, 1 row affected (0.01 sec)
+
+	mysql> select * from t_person;
+	+--------+------+------+
+	| name   | age  | sex  |
+	+--------+------+------+
+	| 李海   |    0 | NULL |
+	+--------+------+------+
+	
+	**注意：** 
+	  当一条insert语句执行成功之后，表格当中必然会多一行记录。即使多的这一行记录当中某些字段是null,后期也没有办法在insert语句插入数据了，
+	  只能使用update进行更新。
+
+	
+	 可以省略前面的字段，但values要一一对应
+	 insert into t_person values('jack' , 12 , '男' );
+	 mysql> select * from t_person;
+	+--------+------+------+
+	| name   | age  | sex  |
+	+--------+------+------+
+	| 李海   |    0 | NULL |
+	| jack   |   12 | 男   |
+	+--------+------+------+
+	
+	
+	//一次插入多行
+	insert into t_person (name ,age , sex) values('jackk',20,'女'),('tamp',15,'男');
+	mysql> select * from t_person;
+	+--------+------+------+
+	| name   | age  | sex  |
+	+--------+------+------+
+	| 李海   |    0 | NULL |
+	| jack   |   12 | 男   |
+	| jackk  |   20 | 女   |
+	| tamp   |   15 | 男   |
+	+--------+------+------+
+	
+	
+	8. 表的复制
+	语法:
+	   create table  表名  as select语句;//将查询结果当做表创建出来 
+		create table emp1 as select * from emp ;
+		mysql> desc emp1;
+		+----------+-------------+------+-----+---------+-------+
+		| Field    | Type        | Null | Key | Default | Extra |
+		+----------+-------------+------+-----+---------+-------+
+		| EMPNO    | int         | NO   |     | NULL    |       |
+		| ENAME    | varchar(10) | YES  |     | NULL    |       |
+		| JOB      | varchar(9)  | YES  |     | NULL    |       |
+		| MGR      | int         | YES  |     | NULL    |       |
+		| HIREDATE | date        | YES  |     | NULL    |       |
+		| SAL      | double(7,2) | YES  |     | NULL    |       |
+		| COMM     | double(7,2) | YES  |     | NULL    |       |
+		| DEPTNO   | int         | YES  |     | NULL    |       |
+		+----------+-------------+------+-----+---------+-------+
+		
+	
+	9.将查询结果插入一张表中
+		insert into 表名 select语句；
+		
+		
+		
+	10.修改数据：update
+	语法格式：
+	   update 表名 set 字段名1=值1，字段名2=值2... where 条件;
+	   
+	   **注意：**没有条件整张表数据全部更新。
+
+	案例：将部门10的loc修改为shanghai,将部门名称修改为renshibu
+	
+	update dept set loc='shanghai' ,dname = 'renshibu' where deptno = 10;
+	
+	mysql> select * from dept;
+	+--------+------------+----------+
+	| DEPTNO | DNAME      | LOC      |
+	+--------+------------+----------+
+	|     10 | renshibu   | shanghai |
+	|     20 | RESEARCH   | DALLAS   |
+	|     30 | SALES      | CHICAGO  |
+	|     40 | OPERATIONS | BOSTON   |
+	+--------+------------+----------+
+
+	更新所有数据 
+	update dept set loc = 'x',dname='y';
+	
+	11.删除数据 
+	语法格式：
+	delete from 表名 where 条件;
+	
+	**注意：** 没有条件全部删除。
+	
+	删除10部门的数据 
+	delete from dept where deptno = 10;
+	
+	删除所有数据 
+	delete from dept ;
+	
+	
+	**怎么删除大表（重点）** 上面删除方法效率慢
+		truncate table 表名;  //删除后，永久丢失，数据不可找回
+
+
+	12.对于表结构的修改，不讲，使用工具即可，开发中对表结构的修改很少
+	
+	在程序中sql包括:insert delete update select 
+
+
+
+	13.约束
+	
+	13.1 什么是约束？觉的约束有哪此呢
+	在创建表的时候，可以给表的字段添加相应的约束，添加约束目的是为了保证表中数据的合法性
+	有效性，完整性
+	
+	常见约束：
+	   非空约束(not null) : 约束字段不能为null
+	   唯一..(unique):约束字段不能重复
+	   主键..(primary key):约束字段即不能为null,也不能重复(简称pk)
+	   外键..(foreign key):....(简称FK)
+	   检查...(check):注意Oracle数据库有check约束，但mysql没有，目前mysql不去持该约束
+
+
+	13.2 非空约束
+
+	drop table if exists t_user;
+	
+	create table t_user(id int , usename varchar(255) not null,password varchar(255));
+
+	insert into  t_user(id,password) values(1,'12345');
+	
+	mysql> insert into  t_user(id,password) values(1,'12345');//usename 不能为null
+	ERROR 1364 (HY000): Field 'usename' doesn't have a default value
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+

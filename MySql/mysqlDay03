@@ -1,0 +1,396 @@
+ 1.约束
+ 1.1唯一性约束(unique)
+ 唯一约束修饰字段具有唯一性，不能重复，但可以为null.
+ 案例：
+ drop table if exists t_user;
+ 
+ create table t_user (id int,usename varchar(255) unique);//【列级约束】
+ insert into t_user values(1,'123');
+ insert into t_user values(2,'123');//不能重复，但是可以为null
+ 
+ insert into t_user values(3);//null
+ 
+    mysql>  insert into t_user values(1,'123');
+	Query OK, 1 row affected (0.01 sec)
+	mysql>  insert into t_user values(2,'123');
+	ERROR 1062 (23000): Duplicate entry '123' for key 't_user.usename'
+	
+ 案例：给两个列或者多个列添加unique
+  drop table if exists t_user;
+ 
+ create table t_user (id int,usename varchar(255),usecode varchar(255), unique(usename,usecode));【表级约束】//usecode与usename联合起来唯一
+ -----------------
+ usecode   usename
+   111       123
+   111       1234
+ -----------------
+ 上述例子可以不算重复 
+ 
+ **注意：**非空约束只有列级约束，没有表级约束
+ 
+ 
+ 
+ 1.2主键约束
+   怎么给一张表添加主键约束呢
+   drop table if exists t_user;
+   create table t_user (
+    id int primary key auto_increment,
+	username varchar(255),
+	paddward varchar(255)
+   );
+   
+   insert into t_user values(1,'sks','2322');
+   insert into t_user values(2,'s','12346');
+	mysql> select * from t_user;
+	+----+----------+-------+
+	| id | username | email |
+	+----+----------+-------+
+	|  1 | sks      | 2322  |
+	|  2 | s        | 12346 |
+	+----+----------+-------+
+	
+	
+	insert into t_user values(1,'20','232287');//主键约束的字段不能重复
+	
+	mysql> insert into t_user values(1,'20','232287');
+	ERROR 1062 (23000): Duplicate entry '1' for key 't_user.PRIMARY'
+	
+	
+	
+	insert into t_user(username,email) values('20','232287')//主键约束的字段不能为null
+	
+	mysql> insert into t_user(username,email) values('20','232287');
+	ERROR 1364 (HY000): Field 'id' doesn't have a default value
+	
+	**注意：**主键约束特点是：不能为null,也不能重复。
+	
+	* 主键相关的术语：
+	主键约束：primary key
+	主键字段 ： id字段添加primary key 之后，id叫做主键字段 
+	主键值： id字段中的每个值都是
+	
+	
+	* 主键作用：
+	  表的设计三范式中有要求，第一范式就要求任何一张表都应该有主键
+	  
+	  主键作用：主键值是这行记录在这张表当中的唯一标识
+	  
+	 
+	主键分类？
+		单一主键(推荐)
+		复合主键(多个字段联合起来添加一个主键约束)(复合主键不推荐使用，因为复合主键违背三范式)
+		
+		
+		自然主键：主键值最好是一个与业务没有任何关系的自然数
+		业务主键：(主键值和系统的业务挂钩，例如：拿着银行卡的卡号做主键，拿着身份证做主键)(不推荐用)
+	
+	** 一张表的主键约束只能有一个。（记住）
+	
+	
+	
+	表级约束方式定义主键
+	drop table if exists u_user;
+	create table u_user(
+		id int ,
+		username varchar(255),
+		primary key(id)
+	);
+	
+	
+	复合主键，不要掌握
+	drop table if exists u_user;
+	create table u_user(
+		id int ,
+		username varchar(255),
+		passward varchar(255),
+		primary key(id,passward)
+	);
+ 
+ 
+	* mysql提供主键值自增 auto_increment (非常重要)
+	从1开始
+	
+	
+	drop table if exists u_user;
+	create table u_user(
+		id int primary key auto_increment,
+		username varchar(255),
+		passward varchar(255)
+	);
+	
+	insert into u_user (username) values('1');
+	insert into u_user (username) values('k');
+	insert into u_user (username) values('k');
+	select * from u_user;
+	+----+----------+----------+
+	| id | username | passward |
+	+----+----------+----------+
+	|  1 | 1        | NULL     |
+	|  2 | k        | NULL     |
+	|  3 | k        | NULL     |
+	+----+----------+----------+
+ 
+	提示：oracle当中也有提供了一个自增机制，叫做序列(sequence)对象;
+	
+	
+	
+	1.3外键约束
+	* 关于外键约束的相关术语：
+	   外键约束：foreign key
+	   外键字段：添加有外键约束的字段 
+	   外键值：外键字段中的每一个值 。
+	   
+	   t_class 班级表
+	   cno                cname
+	   ------------------------------
+	   101       		高三一班
+	   102             	高三二班
+		
+		
+		
+	   t_student 学生表
+		sno(pk)           sname       classno(该字段添加外键约束)
+       -----------------------------------------------------------------
+          1                 zs1         101
+ 		  2                zs3          102
+      该表t_student表中的classno字段，添加了外键约束，所以必须是t_class表中的数据 
+ 
+	
+	
+		*将以上的表写出来 
+		 t_student中的classno字段引用t_class表中的cno字段，此时t_student表叫做子表
+		
+		
+		顺序要求：
+		  删除数据时，先删除子表，再删除父表。
+		  添加数据时，先添加父表，在添加子表。
+		  创建表时，先创建父表，在创建子表。
+		  删除表时，先删除子表，在删除父表。
+		  
+		  
+		    删除表时，先删除子表，在删除父表。
+		  drop table if exists t_student;
+		  drop table if exists t_class;
+		  
+		  
+		   创建表时，先创建父表，在创建父表。
+		    create table t_class (
+			 cno int  primary key auto_increment,
+			 cname varchar(255)
+			);
+		    create table t_student(
+			  sno int primary key,
+			  sname varchar(255),
+			  classno int ,
+			  foreign key (classno) references t_class(cno)
+			);
+			
+			 添加数据时，先添加父表，在添加子表。
+			insert into t_class (cno,cname) values(1,'高一'),(2,'高二');
+			insert into t_student (sno , sname, sclassno) values(1,'ss',2);
+		   
+		   mysql> select * from t_student;
+		 	+-----+-------+---------+
+			| sno | sname | classno |
+			+-----+-------+---------+
+			|   1 | ss    |       2 |
+			+-----+-------+---------+
+		  
+		  
+		    insert into t_student (sno , sname, classno) values(1,'ss',3);//给子表中外键约束字段添加的值必须是父表中关联的字段中的值
+			mysql> insert into t_student (sno , sname, classno) values(1,'ss',3);
+			ERROR 1062 (23000): Duplicate entry '1' for key 't_student.PRIMARY'
+ 
+			
+		* 外键可以为null吗？
+		 外键可以为null;
+		 insert into t_student (sno,sname) values(2,'vb');
+		 
+		 mysql> select * from t_student;
+		+-----+-------+---------+
+		| sno | sname | classno |
+		+-----+-------+---------+
+		|   1 | ss    |       2 |
+		|   2 | vb    |    NULL |
+		+-----+-------+---------+
+		
+		* 外键字段引用其他表的某个字段时，被引用的字段必须是主键吗？
+		 **注意：**被引用的字段不一定是主键，但至少具有unique约束。
+ 
+ 
+	
+	2.存储引擎（了解）
+	 2.1完整的建表语句
+	   create table `t_X`(
+		`id` int(11) default null ,
+	   ) engine=innoDB  default charset = utf8;
+	   
+	   建表时可以指定存储引擎，也可以指定字符集。
+	   mysql 默认引擎 innoDB
+	   默认字符集utf8
+	   
+	  2.2 什么是存储引擎
+	    存储引擎这个名字只有在mysql中存在（oracle 中有对应的机制，'表的存储方法',不叫存储引擎）
+ 
+	  2.3查看引擎
+	     show engine \G
+		 
+		 共有9种
+		 
+ 
+	  2.4常见存储引擎
+	  *********************** 6. row ***************************
+		  Engine: MyISAM
+		 Support: YES
+		 Comment: MyISAM storage engine
+		Transactions: NO
+				  XA: NO
+		  Savepoints: NO
+		这种存储引擎不支持事务
+		
+		
+	3.事务(Transaction)
+	   3.1 什么是事务
+	   一个事务是一个完整的业务逻辑单元，不可再分。
+	   比如：银行账户转账，从a账户向b账户转账1000，需要执行两条：
+	   update t_act set balance = balance - 1000 where actno = 'act-001';
+	   update t_act set balance = balance + 1000 where actno = 'act-002';
+	   以上两条DML语句同时成功，或者同时失败，不允许出现一条成功，一条失败。
+	   
+	   要想保证以上两条DML语句成功或者同时失败，那么就要使用数据库的”事务“
+ 
+ 
+       3.2 事务相关的语句只有：DML语句(insert delete update)
+		
+		事务语句：rollback; commit;
+	   
+	   
+	   3.3事务特性
+	      四大特性：ACID
+		   A: 原子性：事务是最少的工作单元，不可再分
+		   C:一致性：事务必须保证金条DML语句同时成功或者同时失败
+		   I:隔离性：事务A与事务B之间具有隔离
+		   D:持久性：最终数据必须持久化到硬盘文件中，事务才算成功的结束 
+	   
+	   3.4
+	   
+	   3.5演示
+	     * mysql事务默认情况下是自动提交
+		 （什么自动提交？只要执行任意一条DML语句则提交一次）
+		 关闭自动提交  start transaction;
+		 
+	   3.6演示回滚
+	   mysql> start transaction;//关闭自动提交
+		Query OK, 0 rows affected (0.00 sec)
+
+		mysql> insert into t_user values(5,'lll','200');
+		Query OK, 1 row affected (0.00 sec)
+
+		mysql> select * from t_user;
+		+----+----------+-------+
+		| id | username | email |
+		+----+----------+-------+
+		|  1 | 22       | lll   |
+		|  5 | lll      | 200   |
+		+----+----------+-------+
+		2 rows in set (0.00 sec)
+
+		mysql> rollback;
+		Query OK, 0 rows affected (0.01 sec)
+
+		mysql> select * from t_user;
+		+----+----------+-------+
+		| id | username | email |
+		+----+----------+-------+
+		|  1 | 22       | lll   |
+		+----+----------+-------+
+		1 row in set (0.00 sec)
+	   
+	   3.7提交
+	   mysql> insert into t_user values(5,'ll','2000');
+		Query OK, 1 row affected (0.03 sec)
+
+		mysql> select * from t_user;
+		+----+----------+-------+
+		| id | username | email |
+		+----+----------+-------+
+		|  1 | 22       | lll   |
+		|  5 | ll       | 2000  |
+		+----+----------+-------+
+		2 rows in set (0.01 sec)
+
+		mysql> commit;   //提交
+		Query OK, 0 rows affected (0.00 sec)
+
+		mysql> rollback;  //提交过后的数据不能再回滚
+		Query OK, 0 rows affected (0.00 sec)
+
+		mysql> select * from t_user;
+		+----+----------+-------+
+		| id | username | email |
+		+----+----------+-------+
+		|  1 | 22       | lll   |
+		|  5 | ll       | 2000  |
+		+----+----------+-------+
+		2 rows in set (0.00 sec)
+	   
+	   
+	   
+	   
+	   5. 视图(view)
+	     5.1什么是视图
+		  站在不同角度去看数据（同一张表的数据，通过不同的角度去看待）
+	     
+		 5.2怎么创建视图？怎么删除视图？
+		 create view myview as select empno , ename from emp ;//创建
+		 drop view myview;//删除
+	   
+	     5.3 对视图进行增删改查，会影响到原表数据。（通过视图影响原表数据的，不是直接操作原表）
+		 可以对视图进行增删改查
+		 
+		 5.4面向视图操作
+		 mysql> select * from myview;
+		+-------+--------+
+		| empno | ename  |
+		+-------+--------+
+		|  7369 | SMITH  |
+		|  7499 | ALLEN  |
+		|  7521 | WARD   |
+		|  7566 | JONES  |
+		|  7654 | MARTIN |
+		|  7698 | BLAKE  |
+		|  7782 | CLARK  |
+		|  7788 | SCOTT  |
+		|  7839 | KING   |
+		|  7844 | TURNER |
+		|  7876 | ADAMS  |
+		|  7900 | JAMES  |
+		|  7902 | FORD   |
+		|  7934 | MILLER |
+		+-------+--------+
+		create table emp1 as select * from emp;
+		create view myview as select empno,ename,sal from emp1;
+		update myview set ename='lihai',sal = 1 where empno = 7369;//通过视图影响原表数据 
+		delete from myview where empno = 7369; 通过视图删除原表
+	   
+	   
+	   5.5视图的作用
+	      保密级别高，不会暴露原表中的数据 
+		  
+		  
+	
+	6.三范式(重点)
+	   设计表的依据。按照三范式设计的表不会出现数据冗余 
+	   
+	   三范式都哪些 
+	        第一范式：每个表中都要主键约束，每一个字段原子性不可再分
+	        第二范式：建立第一范式基础上，所有非主键字段完全依赖主键，不能产生部分依赖
+			   多对多，两张表，关系表两外键
+			   
+			第三范式：建立在第二范式上，非主键字段不能传递依赖于主键字段 
+			     一对多？两张表，多的表加外键 
+	     
+	   
+	   
+	   
+ 

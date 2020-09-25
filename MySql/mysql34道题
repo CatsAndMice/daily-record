@@ -1,0 +1,102 @@
+1.取得每个部门最高薪水的人员名称
+
+第一步：取每个部门最高薪水
+select deptno, max(sal) as sal from emp group by deptno ;
++--------+---------+
+| deptno | sal     |
++--------+---------+
+|     20 | 3000.00 |
+|     30 | 2850.00 |
+|     10 | 5000.00 |
++--------+---------+
+第二步：取最高薪水人员名称
+select e.ename,t.* from 
+(select deptno, max(sal) as sal from emp group by deptno ) 
+t 
+join emp e on t.deptno = e.deptno and t.sal = e.sal;
+
++-------+--------+---------+
+| ename | deptno | sal     |
++-------+--------+---------+
+| BLAKE |     30 | 2850.00 |
+| SCOTT |     20 | 3000.00 |
+| KING  |     10 | 5000.00 |
+| FORD  |     20 | 3000.00 |
++-------+--------+---------+
+
+
+
+2.哪些人的薪资在部门平均工薪上
+select deptno, avg(sal) from emp group by deptno;
+
+将以上查询结果当做t表，t和emp表连接
+select 
+ t.* ,e.ename,e.sal 
+ from 
+ emp e
+ join
+  (select deptno, avg(sal) as avgsal from emp group by deptno) t
+  on t.deptno = e.deptno and t.sal >t.avgsal
+
+
+3.取得部门中(所有人)平均薪水等级
+1.取所有的工薪等级
+slect deptno ,sal ,grade from emp join salgrade on sal >= losal and sal<= hisal ;
+2.部门分类取平均薪水等级
+select avg(grade),deptno from emp join salgrade on sal>=losal and sal <=hisal group by deptno order by deptno;
+
+4.不准用组函数(max)，取最高薪水
+1.limit 
+select sal from emp order by sal  desc  limit 1;
+2. max
+select max(sal) from emp ;
+
+5.平均薪水最高的部门编号 
+1.
+select deptno, avg(sal) as avgsal from emp group by deptno order by avgsal desc limit 1;
+
+2.
+select max(t.avgsal) from (select deptno, avg(sal) as avgsal from emp) t;
+
+
+7.求平均薪水的等级最低部门的部门名称
+select t.*,s.grade from (select deptno, avg(sal) as avgsal from emp group by deptno order by   avgsal desc limit 1 ) t join salgrade s on t.avgsal>=s.losal and t.avgsal <=s.hisal;
+
+
+//distinct去重
+select distinct mgr from emp where mgr is not null;
+
+
+8.取得比普通员工（员工代码没有在mgr字段上出现的）的最高薪水还要高领导
+1.找出普通员工最高薪水
+select max (sal) from emp where empno not in (select distinct mgr from emp where mgr is not null);
+ 
+9.取薪水最高的前五名员
+select ename ,sal from emp order by sal desc limit 5;
+
+
+10.取薪水最高的第六到第十名员工
+select ename ,sal from emp order by sal desc limit 5,5;
+
+
+11.取得最后入职的一名员工
+select ename,hiredate from emp order by hiredate desc limit 1;
+
+12.取得每个薪水等级有多少员工
+select s.grade as grade,count(s.grade) as count from emp e join salgrade s on  e.sal>=s.losal and e.sal<s.hisal group by s.grade;
+
+13.有3个表S（学生表）
+
+
+14.列出所有员工及领导的名字
+
+select 
+e.ename ,d.ename
+from 
+emp e
+left join
+emp d
+on 
+e.mgr = d.empno;
+
+15.
