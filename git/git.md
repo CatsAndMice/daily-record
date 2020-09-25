@@ -69,8 +69,11 @@ git push 推送分支到远程
 
 git pull   从远程拉取代码
 
-
-
+** 关联远程仓库
+git remote add origin  仓库地址
+```shell
+git remote add origin git@github.com:stormzhang/test.git
+```
 ## git错误总结
 
 ![image-20200513161733227](D:\编辑器\Typora\markdown\git\image-20200513161733227.png)
