@@ -33,7 +33,7 @@ babel本身并没有做任何事，编译要依赖babel插件和babel预设
 }
 ```
 
-* babel预计
+* babel预设
 
 预设有很多，最常见的预设是`@babel/preset-env`
 

@@ -20,8 +20,8 @@
 
 注册后进行Your repositories
 
-![image-20200513165412856](D:\编辑器\Typora\markdown\git\image-20200513165412856.png)
+![image-20200513165412856](D:\Typora\markdown\git\image-20200513165412856.png)
 
 自行创建仓库，英语不好可以用谷歌自带的翻译下
 
-![image-20200513165503087](D:\编辑器\Typora\markdown\git\image-20200513165503087.png)
+![image-20200513165503087](D:\Typora\markdown\git\image-20200513165503087.png)
