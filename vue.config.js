@@ -15,9 +15,9 @@ module.exports = {
         },
 
         //外部扩展
-        externals: {
-            "myvue": "Vue",
-        },
+//         externals: {
+//             "myvue": "Vue",
+//         },
 
         //gizp
         plugins: isProd &&[
