@@ -1,5 +1,7 @@
 let UglifyJsPlugin = require("uglifyjs-webpack-plugin");
-const CompressionWebpackPlugin = require('compression-webpack-plugin');
+const CompressionWebpackPlugin = require('compression-webpack-plugin');// 版本需要在"compression-webpack-plugin": "^1.1.12",否则会报变量不存在等错误
+   
+
 const path = require('path');
 function isProd() {
     return process.env.NODE_ENV === 'production';
